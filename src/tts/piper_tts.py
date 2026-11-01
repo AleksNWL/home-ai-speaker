@@ -24,15 +24,21 @@ class PiperTTS:
     ) -> None:
         self.model_path = Path(model_path)
         self.config_path = Path(config_path) if config_path else None
-        self.piper_binary = piper_binary
         self.speak_rate = speak_rate
-        self._available = shutil.which(piper_binary) is not None and self.model_path.exists()
+        bin_path = Path(piper_binary)
+        if bin_path.exists() and bin_path.is_file():
+            self.piper_binary = str(bin_path)
+        else:
+            found = shutil.which(piper_binary)
+            self.piper_binary = found or piper_binary
+        self._available = Path(self.piper_binary).exists() and self.model_path.exists()
         if not self._available:
             logger.warning(
                 "Piper not ready (binary=%s model=%s) — using beep fallback",
-                piper_binary,
+                self.piper_binary,
                 self.model_path,
             )
+
 
     @property
     def available(self) -> bool:

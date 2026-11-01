@@ -38,7 +38,8 @@ tts:
   # Download RU voice from https://github.com/rhasspy/piper/blob/master/VOICES.md
   model_path: "models/piper/ru_RU-dmitri-medium.onnx"
   config_path: "models/piper/ru_RU-dmitri-medium.onnx.json"
-  piper_binary: "piper"
+  # Local binary after scripts/download_models.sh (fallback: system `piper`)
+  piper_binary: "models/piper/piper"
   speak_rate: 1.0
 
 llm:

@@ -4,6 +4,7 @@ import logging
 import queue
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from src.audio import AudioCapture, AudioPlayback, EnergyVad
@@ -67,10 +68,13 @@ class SpeakerApp:
 
         tts_model = resolve_path(tts_cfg.get("model_path"))
         tts_config = resolve_path(tts_cfg.get("config_path"))
+        piper_bin = resolve_path(tts_cfg.get("piper_binary")) or Path(
+            tts_cfg.get("piper_binary") or "piper"
+        )
         self.tts = PiperTTS(
             model_path=tts_model or "models/piper/missing.onnx",
             config_path=tts_config,
-            piper_binary=tts_cfg.get("piper_binary", "piper"),
+            piper_binary=str(piper_bin),
             speak_rate=float(tts_cfg.get("speak_rate", 1.0)),
         )
 
