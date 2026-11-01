@@ -1,0 +1,6 @@
+# Optional wake-word stack.
+# Needs Python <=3.12 usually (tflite-runtime wheels).
+# On Rock Pi with Python 3.14 skip this — orchestrator falls back to Enter key.
+openwakeword>=0.6.0
+scikit-learn>=1.0
+scipy>=1.3

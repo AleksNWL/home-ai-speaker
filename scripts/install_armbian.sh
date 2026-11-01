@@ -23,6 +23,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip wheel
 pip install -r requirements.txt
+# Wake word is optional (often breaks on Python 3.14 aarch64)
+pip install -r requirements-wake.txt || echo "WARN: wake word deps skipped — Enter-key fallback OK"
 
 mkdir -p data/music data/cache logs models/piper models/whisper
 if [[ ! -f config/secrets.yaml ]]; then
@@ -32,7 +34,10 @@ fi
 bash scripts/download_models.sh || true
 
 echo
+echo "Python: $(python3 --version)"
 echo "1) Edit config/secrets.yaml (Gemini key)"
-echo "2) Audio with FiFine: INPUT_DEVICE=plughw:2,0 bash scripts/audio_smoke_test.sh"
-echo "3) Run: source .venv/bin/activate && python -m src.orchestrator -v"
-echo "4) Optional systemd: see deploy/README.md"
+echo "2) Audio: INPUT_DEVICE=plughw:2,0 OUTPUT_DEVICE=plughw:0,0 bash scripts/audio_smoke_test.sh"
+echo "3) Text test: source .venv/bin/activate && python -m src.orchestrator --text \"привет\" -v"
+echo "4) Voice: python -m src.orchestrator -v   # press Enter if no wake model"
+echo "5) Optional systemd: see deploy/README.md"
+

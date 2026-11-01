@@ -33,7 +33,7 @@ python -m src.orchestrator -v
 python -m src.orchestrator --text "какая погода" -v
 ```
 
-Если openWakeWord не установился — режим fallback: нажми **Enter** в терминале, чтобы имитировать wake word.
+Если openWakeWord не установился (часто на **Python 3.14** / aarch64 из‑за `tflite-runtime`) — режим fallback: нажми **Enter** в терминале, чтобы имитировать wake word. Позже можно поставить Python 3.11/3.12 и `pip install -r requirements-wake.txt`.
 
 ## Конфиг
 
