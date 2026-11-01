@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from typing import Any, Callable
 
@@ -18,12 +19,14 @@ class GeminiClient:
         system_prompt: str = "",
         temperature: float = 0.4,
         max_output_tokens: int = 512,
+        proxy: str | None = None,
     ) -> None:
         self.api_key = api_key
         self.model = model
         self.system_prompt = system_prompt
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
+        self.proxy = (proxy or "").strip() or None
         self._client = None
 
     def _ensure(self) -> None:
@@ -33,7 +36,30 @@ class GeminiClient:
             raise RuntimeError("Gemini API key missing (config/secrets.yaml or GEMINI_API_KEY)")
         from google import genai
 
-        self._client = genai.Client(api_key=self.api_key)
+        kwargs: dict[str, Any] = {"api_key": self.api_key}
+        if self.proxy:
+            # Ensure child HTTP stacks also see the proxy
+            os.environ.setdefault("HTTPS_PROXY", self.proxy)
+            os.environ.setdefault("HTTP_PROXY", self.proxy)
+            os.environ.setdefault("https_proxy", self.proxy)
+            os.environ.setdefault("http_proxy", self.proxy)
+            logger.info("Gemini via proxy %s", self._redact_proxy(self.proxy))
+            try:
+                from google.genai import types
+
+                kwargs["http_options"] = types.HttpOptions(
+                    client_args={"proxy": self.proxy},
+                )
+            except Exception:
+                # Older SDK: env vars above are enough for httpx
+                pass
+
+        self._client = genai.Client(**kwargs)
+
+    @staticmethod
+    def _redact_proxy(url: str) -> str:
+        # hide credentials in logs: http://user:pass@host:port -> http://***@host:port
+        return re.sub(r"(://[^:/@]+:)[^@]+(@)", r"\1***\2", url)
 
     def reply(
         self,
@@ -99,7 +125,6 @@ class GeminiClient:
         raw = (text or "").strip()
         if not raw:
             return None
-        # fenced json
         fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
         if fence:
             raw = fence.group(1)

@@ -36,12 +36,24 @@ def load_config(
         cfg = _deep_merge(cfg, secret_data)
 
     # Env overrides for CI / quick tests
+    gemini = cfg.setdefault("gemini", {})
     if os.environ.get("GEMINI_API_KEY"):
-        cfg.setdefault("gemini", {})["api_key"] = os.environ["GEMINI_API_KEY"]
+        gemini["api_key"] = os.environ["GEMINI_API_KEY"]
+    # Proxy for Gemini (region blocks). Prefer GEMINI_PROXY, then HTTPS_PROXY / ALL_PROXY
+    proxy = (
+        os.environ.get("GEMINI_PROXY")
+        or os.environ.get("HTTPS_PROXY")
+        or os.environ.get("https_proxy")
+        or os.environ.get("ALL_PROXY")
+        or os.environ.get("all_proxy")
+    )
+    if proxy:
+        gemini["proxy"] = proxy
     if os.environ.get("HA_URL"):
         cfg.setdefault("home_assistant", {})["url"] = os.environ["HA_URL"]
     if os.environ.get("HA_TOKEN"):
         cfg.setdefault("home_assistant", {})["token"] = os.environ["HA_TOKEN"]
+
 
     for key in ("logs", "cache"):
         rel = cfg.get("paths", {}).get(key)
