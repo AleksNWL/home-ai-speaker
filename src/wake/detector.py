@@ -78,12 +78,18 @@ class WakeWordDetector:
         stop_event=None,
     ) -> None:
         if self._fallback:
-            logger.info("Fallback mode: press Enter to simulate wake word")
+            print(
+                "\n=== Режим без wake-word ===\n"
+                "Нажми Enter, скажи команду в микрофон, подожди ответ.\n"
+                "Ctrl+C — выход.\n",
+                flush=True,
+            )
             while stop_event is None or not stop_event.is_set():
                 try:
-                    input()
+                    input("▶ Enter = слушать: ")
                 except EOFError:
                     break
+                print("… слушаю", flush=True)
                 on_wake()
             return
 

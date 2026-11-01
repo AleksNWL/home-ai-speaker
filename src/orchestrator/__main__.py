@@ -4,7 +4,6 @@ import argparse
 import logging
 import signal
 import sys
-import threading
 from pathlib import Path
 
 # Allow `python -m src.orchestrator` from repo root
@@ -66,14 +65,18 @@ def main() -> int:
     def _shutdown(*_args) -> None:
         logging.info("Shutting down...")
         app.stop()
+        # input() in main thread may ignore SIGINT until Enter — force exit
+        raise SystemExit(0)
 
     signal.signal(signal.SIGINT, _shutdown)
     signal.signal(signal.SIGTERM, _shutdown)
 
-    t = threading.Thread(target=app.run, daemon=True)
-    t.start()
-    while t.is_alive():
-        t.join(timeout=0.5)
+    # Must run on main thread: Enter-key wake uses input()/stdin
+    print("Колонка запущена. SSH SOCKS (ssh -D 1080) должен быть активен.", flush=True)
+    try:
+        app.run()
+    except (KeyboardInterrupt, SystemExit):
+        app.stop()
     return 0
 
 

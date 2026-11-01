@@ -103,6 +103,7 @@ class SpeakerApp:
             return
         try:
             self.status.set_state("listening")
+            print("🎤 слушаю…", flush=True)
             # Drop buffered pre-wake audio so STT hears the command
             drained = 0
             while True:
@@ -115,8 +116,10 @@ class SpeakerApp:
                 logger.debug("Drained %s pre-roll chunks", drained)
             audio = self.capture.read_utterance(self.listen_seconds, vad=self.vad)
             self.status.set_state("thinking")
+            print("🧠 распознаю / думаю…", flush=True)
             transcript = self.stt.transcribe(audio, sample_rate=self.capture.sample_rate)
             self.status.update(last_transcript=transcript)
+            print(f"ты: {transcript or '(тишина)'}", flush=True)
             if not transcript:
                 self.speak("Не расслышала, повтори пожалуйста.")
                 return
@@ -136,6 +139,7 @@ class SpeakerApp:
                     self.status.update(error=str(exc))
                     reply = f"Ошибка ИИ: {exc}"
 
+            print(f"она: {reply}", flush=True)
             # Track music status for display
             if "сейчас" in reply.lower() and ("play" in transcript.lower() or "музык" in transcript.lower()):
                 self.status.update(now_playing=reply)
@@ -176,6 +180,7 @@ class SpeakerApp:
                 return
             wake_count += 1
             self.status.update(wake_count=wake_count)
+            print(f"[wake #{wake_count}] обрабатываю…", flush=True)
             threading.Thread(target=session, daemon=True).start()
 
         try:
