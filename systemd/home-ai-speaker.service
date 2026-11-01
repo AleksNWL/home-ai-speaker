@@ -5,13 +5,14 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=rock
+# Change User= if you don't run as root (add that user to group audio)
+User=root
 Group=audio
-WorkingDirectory=/opt/home-ai-speaker
+WorkingDirectory=/root/home-ai-speaker
 Environment=PYTHONUNBUFFERED=1
-Environment=HAS_CONFIG=/opt/home-ai-speaker/config/default.yaml
-Environment=HAS_SECRETS=/opt/home-ai-speaker/config/secrets.yaml
-ExecStart=/opt/home-ai-speaker/.venv/bin/python -m src.orchestrator
+Environment=HAS_CONFIG=/root/home-ai-speaker/config/default.yaml
+Environment=HAS_SECRETS=/root/home-ai-speaker/config/secrets.yaml
+ExecStart=/root/home-ai-speaker/.venv/bin/python -m src.orchestrator
 Restart=on-failure
 RestartSec=3
 

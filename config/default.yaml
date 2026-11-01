@@ -7,9 +7,12 @@ audio:
   sample_rate_capture: 16000
   sample_rate_playback: 22050
   channels: 1
-  # Leave null to use system default; set ALSA/Pulse names after smoke test
+  # After `python -c "import sounddevice as sd; print(sd.query_devices())"`
+  # put device INDEX (int) or name substring. null = system default.
+  # On Rock Pi + FiFine AM8 mic is often a USB device index — set after first query.
   input_device: null
   output_device: null
+
   # Seconds of speech to capture after wake
   listen_seconds: 6.0
   # Energy VAD end-of-utterance (optional early stop)
