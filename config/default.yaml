@@ -10,9 +10,11 @@ audio:
   sample_rate_capture: 16000
   sample_rate_playback: 22050
   channels: 1
-  # FiFine AM8 = card 2, onboard Analog out = card 0 (Crown)
+  # FiFine AM8 mic = card 2; Crown on Rock Pi 3.5mm = card 0 (ES8316)
+  # After reboot run: bash scripts/setup_alsa_rockpi.sh  (Headphone Mixer must be up)
   alsa_input: "plughw:2,0"
   alsa_output: "plughw:0,0"
+
   # Used only when backend: sounddevice
   input_device: null
   output_device: null

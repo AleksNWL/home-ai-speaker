@@ -36,8 +36,9 @@ bash scripts/download_models.sh || true
 echo
 echo "Python: $(python3 --version)"
 echo "1) Edit config/secrets.yaml (Gemini key)"
-echo "2) Audio: INPUT_DEVICE=plughw:2,0 OUTPUT_DEVICE=plughw:0,0 bash scripts/audio_smoke_test.sh"
-echo "3) Text test: source .venv/bin/activate && python -m src.orchestrator --text \"привет\" -v"
-echo "4) Voice: python -m src.orchestrator -v   # press Enter if no wake model"
-echo "5) Optional systemd: see deploy/README.md"
+echo "2) ALSA levels: bash scripts/setup_alsa_rockpi.sh"
+echo "3) Audio smoke: INPUT_DEVICE=plughw:2,0 OUTPUT_DEVICE=plughw:0,0 bash scripts/audio_smoke_test.sh"
+echo "4) Text test: source .venv/bin/activate && python -m src.orchestrator --text \"привет\" -v"
+echo "5) Voice: python -m src.orchestrator -v   # press Enter if no wake model"
+echo "6) Optional systemd: see deploy/README.md"
 
