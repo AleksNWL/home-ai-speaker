@@ -150,15 +150,36 @@ class AlsaPlayback:
         self._lock = threading.Lock()
         self._proc: subprocess.Popen | None = None
 
+    @staticmethod
+    def _ensure_rockpi_jack_levels() -> None:
+        """ES8316 often boots with Headphone Mixer at 0 — bump before each play."""
+        cmds = [
+            ["amixer", "-c", "0", "-q", "sset", "Headphone Mixer", "11"],
+            ["amixer", "-c", "0", "-q", "sset", "DAC", "192"],
+            ["amixer", "-c", "0", "-q", "sset", "Headphone", "3"],
+        ]
+        for cmd in cmds:
+            try:
+                subprocess.run(cmd, check=False, capture_output=True)
+            except Exception:
+                pass
+
     def play(self, audio: np.ndarray, sample_rate: int | None = None) -> None:
         rate = sample_rate or self.sample_rate
         if audio.size == 0:
+            logger.warning("ALSA play: empty audio buffer")
             return
         data = np.asarray(audio, dtype=np.float32).reshape(-1)
         peak = float(np.max(np.abs(data))) if data.size else 0.0
         if peak > 1.0:
             data = data / peak
+        if peak < 0.001:
+            logger.warning("ALSA play: near-silent buffer (peak=%.6f)", peak)
         pcm = (np.clip(data, -1, 1) * 32767).astype(np.int16)
+
+        # Crown on Rock Pi 3.5mm (card 0)
+        if str(self.device).startswith("plughw:0") or str(self.device).startswith("hw:0"):
+            self._ensure_rockpi_jack_levels()
 
         with self._lock:
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
@@ -169,10 +190,21 @@ class AlsaPlayback:
                     wf.setsampwidth(2)
                     wf.setframerate(rate)
                     wf.writeframes(pcm.tobytes())
-                cmd = ["aplay", "-D", str(self.device), "-q", str(path)]
-                logger.info("ALSA play: %s", " ".join(cmd))
-                self._proc = subprocess.Popen(cmd)
-                self._proc.wait()
+                duration = pcm.shape[0] / float(rate)
+                cmd = ["aplay", "-D", str(self.device), str(path)]
+                print(f"🔊 play {duration:.1f}s → {self.device}", flush=True)
+                logger.info("ALSA play: %s (%.1fs, peak=%.3f)", " ".join(cmd), duration, peak)
+                self._proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                )
+                _stdout, stderr = self._proc.communicate()
+                code = self._proc.returncode
+                if code != 0:
+                    err = (stderr or b"").decode("utf-8", errors="ignore").strip()
+                    logger.error("aplay failed code=%s: %s", code, err)
+                    print(f"aplay ERROR {code}: {err}", flush=True)
             finally:
                 self._proc = None
                 try:
