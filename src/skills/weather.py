@@ -29,11 +29,12 @@ WMO_RU = {
 class WeatherSkill:
     name = "get_weather"
 
-    def __init__(self, cfg: dict[str, Any]) -> None:
+    def __init__(self, cfg: dict[str, Any], proxy: str | None = None) -> None:
         self.lat = cfg.get("latitude", 55.7558)
         self.lon = cfg.get("longitude", 37.6173)
         self.timezone = cfg.get("timezone", "Europe/Moscow")
         self.enabled = cfg.get("enabled", True)
+        self.proxy = (proxy or "").strip() or None
 
     def tool_schema(self) -> dict[str, Any]:
         return {
@@ -63,7 +64,11 @@ class WeatherSkill:
             "forecast_days": 1,
         }
         try:
-            with httpx.Client(timeout=8.0) as client:
+            client_kwargs: dict[str, Any] = {"timeout": 20.0}
+            if self.proxy:
+                client_kwargs["proxy"] = self.proxy
+                logger.info("weather via proxy %s", self.proxy.split("@")[-1])
+            with httpx.Client(**client_kwargs) as client:
                 resp = client.get(url, params=params)
                 resp.raise_for_status()
                 data = resp.json()

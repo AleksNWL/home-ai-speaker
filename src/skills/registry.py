@@ -33,7 +33,8 @@ def _set_volume_percent(percent: int) -> str:
 class SkillRegistry:
     def __init__(self, cfg: dict[str, Any], on_timer: Callable[[str], None] | None = None) -> None:
         skills_cfg = cfg.get("skills", {})
-        self.weather = WeatherSkill(skills_cfg.get("weather", {}))
+        proxy = (cfg.get("gemini") or {}).get("proxy") or None
+        self.weather = WeatherSkill(skills_cfg.get("weather", {}), proxy=proxy)
         self.ha = HomeAssistantSkill(
             skills_cfg.get("home_assistant", {}),
             cfg.get("home_assistant", {}),

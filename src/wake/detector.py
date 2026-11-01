@@ -43,6 +43,10 @@ class WakeWordDetector:
             logger.warning("openWakeWord unavailable (%s) — using Enter-key fallback", exc)
             self._fallback = True
 
+    @property
+    def fallback(self) -> bool:
+        return self._fallback
+
     def process_chunk(self, chunk: np.ndarray) -> bool:
         if self._fallback or self._oww is None:
             return False

@@ -181,7 +181,11 @@ class SpeakerApp:
             wake_count += 1
             self.status.update(wake_count=wake_count)
             print(f"[wake #{wake_count}] обрабатываю…", flush=True)
-            threading.Thread(target=session, daemon=True).start()
+            # Enter-fallback: run sync so next Enter waits until reply finishes
+            if self.wake.fallback:
+                session()
+            else:
+                threading.Thread(target=session, daemon=True).start()
 
         try:
             self.wake.listen_forever(
