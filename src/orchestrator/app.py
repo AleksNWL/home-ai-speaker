@@ -75,7 +75,7 @@ class SpeakerApp:
         api_key = (cfg.get("gemini") or {}).get("api_key", "")
         self.llm = GeminiClient(
             api_key=api_key,
-            model=llm_cfg.get("model", "gemini-2.0-flash"),
+            model=llm_cfg.get("model", "gemini-3.5-flash-lite"),
             system_prompt=llm_cfg.get("system_prompt", ""),
             temperature=float(llm_cfg.get("temperature", 0.4)),
             max_output_tokens=int(llm_cfg.get("max_output_tokens", 512)),

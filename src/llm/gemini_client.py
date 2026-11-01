@@ -14,7 +14,7 @@ class GeminiClient:
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-2.0-flash",
+        model: str = "gemini-3.5-flash-lite",
         system_prompt: str = "",
         temperature: float = 0.4,
         max_output_tokens: int = 512,
@@ -74,23 +74,16 @@ class GeminiClient:
 
     def _generate(self, prompt: str) -> str:
         assert self._client is not None
-        try:
-            from google.genai import types
+        from google.genai import types
 
-            response = self._client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    temperature=self.temperature,
-                    max_output_tokens=self.max_output_tokens,
-                ),
-            )
-        except Exception:
-            # Older / simpler call shape
-            response = self._client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-            )
+        response = self._client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=self.temperature,
+                max_output_tokens=self.max_output_tokens,
+            ),
+        )
         text = getattr(response, "text", None) or ""
         if not text and getattr(response, "candidates", None):
             try:

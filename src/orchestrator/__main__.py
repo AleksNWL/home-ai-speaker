@@ -42,18 +42,25 @@ def main() -> int:
         start_display_server(cfg, status)
 
     if args.text:
-        # Offline path for testing skills/LLM without audio
+        # Offline path for testing skills/LLM without mic wake
         local = app.skills.try_local_rules(args.text)
         if local is not None:
             reply = local
         else:
-            reply = app.llm.reply(
-                args.text,
-                tools=app.skills.tool_schemas(),
-                dispatch=app.skills.dispatch,
-            )
+            try:
+                reply = app.llm.reply(
+                    args.text,
+                    tools=app.skills.tool_schemas(),
+                    dispatch=app.skills.dispatch,
+                )
+            except Exception as exc:
+                logging.exception("LLM failed")
+                reply = f"Ошибка ИИ: {exc}"
         print(reply)
-        app.speak(reply)
+        try:
+            app.speak(reply)
+        except Exception:
+            logging.exception("TTS/playback failed")
         return 0
 
     def _shutdown(*_args) -> None:
