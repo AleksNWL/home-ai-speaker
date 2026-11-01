@@ -20,6 +20,7 @@ class GeminiClient:
         temperature: float = 0.4,
         max_output_tokens: int = 512,
         proxy: str | None = None,
+        timeout_seconds: float = 45.0,
     ) -> None:
         self.api_key = api_key
         self.model = model
@@ -27,7 +28,24 @@ class GeminiClient:
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
         self.proxy = (proxy or "").strip() or None
+        self.timeout_seconds = timeout_seconds
         self._client = None
+
+    def _apply_proxy_env(self) -> None:
+        if not self.proxy:
+            return
+        # Force override — setdefault is not enough if empty junk is already set
+        for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"):
+            os.environ[key] = self.proxy
+        # Do not bypass Google through NO_PROXY
+        no_proxy = os.environ.get("NO_PROXY", "") or os.environ.get("no_proxy", "")
+        cleaned = ",".join(
+            p
+            for p in no_proxy.split(",")
+            if p and "google" not in p.lower() and "googleapis" not in p.lower()
+        )
+        os.environ["NO_PROXY"] = cleaned
+        os.environ["no_proxy"] = cleaned
 
     def _ensure(self) -> None:
         if self._client is not None:
@@ -35,30 +53,27 @@ class GeminiClient:
         if not self.api_key:
             raise RuntimeError("Gemini API key missing (config/secrets.yaml or GEMINI_API_KEY)")
         from google import genai
+        from google.genai import types
 
+        self._apply_proxy_env()
         kwargs: dict[str, Any] = {"api_key": self.api_key}
+
+        client_args: dict[str, Any] = {
+            "timeout": self.timeout_seconds,
+            "trust_env": True,
+        }
         if self.proxy:
-            # Ensure child HTTP stacks also see the proxy
-            os.environ.setdefault("HTTPS_PROXY", self.proxy)
-            os.environ.setdefault("HTTP_PROXY", self.proxy)
-            os.environ.setdefault("https_proxy", self.proxy)
-            os.environ.setdefault("http_proxy", self.proxy)
-            logger.info("Gemini via proxy %s", self._redact_proxy(self.proxy))
-            try:
-                from google.genai import types
+            client_args["proxy"] = self.proxy
+            logger.info("Gemini via proxy %s (timeout=%ss)", self._redact_proxy(self.proxy), self.timeout_seconds)
 
-                kwargs["http_options"] = types.HttpOptions(
-                    client_args={"proxy": self.proxy},
-                )
-            except Exception:
-                # Older SDK: env vars above are enough for httpx
-                pass
-
+        kwargs["http_options"] = types.HttpOptions(
+            timeout=int(self.timeout_seconds * 1000),
+            client_args=client_args,
+        )
         self._client = genai.Client(**kwargs)
 
     @staticmethod
     def _redact_proxy(url: str) -> str:
-        # hide credentials in logs: http://user:pass@host:port -> http://***@host:port
         return re.sub(r"(://[^:/@]+:)[^@]+(@)", r"\1***\2", url)
 
     def reply(
