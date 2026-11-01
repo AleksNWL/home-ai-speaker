@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Домашняя колонка</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="stage">
+    <header class="brand">
+      <p class="brand-name">Домашняя</p>
+      <p id="clock" class="clock">--:--</p>
+    </header>
+
+    <section class="state-block" aria-live="polite">
+      <div id="orb" class="orb state-idle" data-state="idle"></div>
+      <p id="stateLabel" class="state-label">ожидание</p>
+    </section>
+
+    <section class="copy">
+      <p id="transcript" class="transcript"></p>
+      <p id="reply" class="reply"></p>
+      <p id="nowPlaying" class="now-playing"></p>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+speaker:
+  name: "Домашняя"
+  wake_word: "hey_jarvis"  # openWakeWord model name; swap after custom training
+  language: "ru"
+
+audio:
+  sample_rate_capture: 16000
+  sample_rate_playback: 22050
+  channels: 1
+  # Leave null to use system default; set ALSA/Pulse names after smoke test
+  input_device: null
+  output_device: null
+  # Seconds of speech to capture after wake
+  listen_seconds: 6.0
+  # Energy VAD end-of-utterance (optional early stop)
+  vad_enabled: true
+  vad_silence_ms: 900
+  vad_rms_threshold: 0.012
+
+wake:
+  threshold: 0.5
+  cooldown_seconds: 1.5
+  # Path to custom .onnx model; null = built-in openWakeWord model
+  model_path: null
+
+stt:
+  engine: "faster_whisper"  # faster_whisper | gemini
+  model_size: "base"        # tiny | base — keep tiny/base on 4GB RAM
+  device: "cpu"
+  compute_type: "int8"
+  download_root: "models/whisper"
+
+tts:
+  engine: "piper"
+  # Download RU voice from https://github.com/rhasspy/piper/blob/master/VOICES.md
+  model_path: "models/piper/ru_RU-dmitri-medium.onnx"
+  config_path: "models/piper/ru_RU-dmitri-medium.onnx.json"
+  piper_binary: "piper"
+  speak_rate: 1.0
+
+llm:
+  provider: "gemini"
+  model: "gemini-2.0-flash"
+  temperature: 0.4
+  max_output_tokens: 512
+  system_prompt: |
+    Ты голосовой ассистент умной колонки. Отвечай кратко, по-русски, 1–3 предложения.
+    Если нужно действие — вызови инструмент. Не выдумывай entity_id умного дома.
+
+skills:
+  weather:
+    enabled: true
+    # Open-Meteo — без ключа. Город по умолчанию:
+    latitude: 55.7558
+    longitude: 37.6173
+    timezone: "Europe/Moscow"
+  home_assistant:
+    enabled: true
+    # URL and token live in secrets.yaml
+    timeout_seconds: 8
+  music:
+    enabled: true
+    mpd_host: "127.0.0.1"
+    mpd_port: 6600
+    mpd_password: null
+  timers:
+    enabled: true
+
+status:
+  # idle | listening | thinking | speaking | playing
+  http_port: 8787
+  bind: "0.0.0.0"
+
+paths:
+  logs: "logs"
+  cache: "data/cache"

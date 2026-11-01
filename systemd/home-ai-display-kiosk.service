@@ -1,0 +1,15 @@
+[Unit]
+Description=Home AI Speaker display kiosk (Chromium)
+After=home-ai-speaker.service graphical.target
+Wants=home-ai-speaker.service
+
+[Service]
+Type=simple
+User=rock
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/chromium --kiosk --noerrdialogs --disable-infobars --check-for-update-interval=31536000 http://127.0.0.1:8787/
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,138 @@
+:root {
+  --bg0: #0f1c24;
+  --bg1: #173041;
+  --ink: #e8f0f4;
+  --muted: #8aa3b0;
+  --accent: #3ecf8e;
+  --listening: #4db6ff;
+  --thinking: #f0c14a;
+  --speaking: #ff8a5b;
+  --playing: #b388ff;
+  --font-display: "Segoe UI", "DejaVu Sans", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: radial-gradient(120% 80% at 50% 0%, var(--bg1), var(--bg0));
+  color: var(--ink);
+  font-family: var(--font-display);
+  overflow: hidden;
+}
+
+.stage {
+  min-height: 100%;
+  padding: 4vh 5vw;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 2vh;
+}
+
+.brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.brand-name {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.clock {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.state-block {
+  display: grid;
+  place-items: center;
+  gap: 1.2rem;
+}
+
+.orb {
+  width: min(42vw, 220px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 45%),
+              radial-gradient(circle at 50% 50%, var(--accent), #0b1620 70%);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent);
+  animation: breathe 3.2s ease-in-out infinite;
+  transition: background 0.35s ease, transform 0.35s ease;
+}
+
+.orb.state-listening {
+  background: radial-gradient(circle at 35% 30%, #ffffff66, transparent 45%),
+              radial-gradient(circle at 50% 50%, var(--listening), #0b1620 70%);
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+.orb.state-thinking {
+  background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 45%),
+              radial-gradient(circle at 50% 50%, var(--thinking), #0b1620 70%);
+  animation: spin-soft 2s linear infinite;
+}
+
+.orb.state-speaking {
+  background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 45%),
+              radial-gradient(circle at 50% 50%, var(--speaking), #0b1620 70%);
+  animation: pulse 0.8s ease-in-out infinite;
+}
+
+.orb.state-playing {
+  background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 45%),
+              radial-gradient(circle at 50% 50%, var(--playing), #0b1620 70%);
+}
+
+.state-label {
+  margin: 0;
+  text-transform: lowercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.copy {
+  min-height: 18vh;
+}
+
+.transcript, .reply, .now-playing {
+  margin: 0 0 0.6rem;
+  max-width: 40rem;
+}
+
+.transcript {
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.reply {
+  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+  line-height: 1.35;
+}
+
+.now-playing {
+  color: var(--accent);
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.08); filter: brightness(1.15); }
+}
+
+@keyframes spin-soft {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(6deg) scale(1.03); }
+  100% { transform: rotate(0deg) scale(1); }
+}

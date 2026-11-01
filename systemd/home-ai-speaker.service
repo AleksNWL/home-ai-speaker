@@ -1,0 +1,22 @@
+[Unit]
+Description=Home AI Speaker orchestrator
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rock
+Group=audio
+WorkingDirectory=/opt/home-ai-speaker
+Environment=PYTHONUNBUFFERED=1
+Environment=HAS_CONFIG=/opt/home-ai-speaker/config/default.yaml
+Environment=HAS_SECRETS=/opt/home-ai-speaker/config/secrets.yaml
+ExecStart=/opt/home-ai-speaker/.venv/bin/python -m src.orchestrator
+Restart=on-failure
+RestartSec=3
+
+# Nice for voice latency on small boards
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

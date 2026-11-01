@@ -1,0 +1,20 @@
+# Example MPD config for home-ai-speaker
+# Copy to /etc/mpd.conf (or ~/.config/mpd/mpd.conf) and adjust paths.
+
+music_directory     "/opt/home-ai-speaker/data/music"
+playlist_directory  "/var/lib/mpd/playlists"
+db_file             "/var/lib/mpd/tag_cache"
+log_file            "/var/log/mpd/mpd.log"
+pid_file            "/run/mpd/pid"
+state_file          "/var/lib/mpd/state"
+
+bind_to_address     "127.0.0.1"
+port                "6600"
+
+audio_output {
+    type            "alsa"
+    name            "Crown / USB DAC"
+    mixer_type      "software"
+}
+
+filesystem_charset  "UTF-8"
