@@ -5,7 +5,6 @@ import threading
 from typing import Iterator
 
 import numpy as np
-import sounddevice as sd
 
 from .vad import EnergyVad
 
@@ -23,7 +22,7 @@ class AudioCapture:
         self.device = device
         self.block_size = block_size
         self._q: queue.Queue[np.ndarray] = queue.Queue(maxsize=64)
-        self._stream: sd.InputStream | None = None
+        self._stream = None
         self._lock = threading.Lock()
 
     def _callback(self, indata, frames, time_info, status) -> None:  # noqa: ANN001
@@ -39,6 +38,8 @@ class AudioCapture:
             self._q.put_nowait(indata.copy())
 
     def start(self) -> None:
+        import sounddevice as sd
+
         with self._lock:
             if self._stream is not None:
                 return

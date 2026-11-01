@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from src.audio import AudioCapture, AudioPlayback, EnergyVad
+from src.audio import EnergyVad, create_capture, create_playback
 from src.config import resolve_path
 from src.llm import GeminiClient
 from src.skills import SkillRegistry
@@ -31,15 +31,8 @@ class SpeakerApp:
         speaker_cfg = cfg.get("speaker", {})
 
         self.listen_seconds = float(audio_cfg.get("listen_seconds", 6.0))
-        self.capture = AudioCapture(
-            sample_rate=int(audio_cfg.get("sample_rate_capture", 16000)),
-            channels=int(audio_cfg.get("channels", 1)),
-            device=audio_cfg.get("input_device"),
-        )
-        self.playback = AudioPlayback(
-            sample_rate=int(audio_cfg.get("sample_rate_playback", 22050)),
-            device=audio_cfg.get("output_device"),
-        )
+        self.capture = create_capture(audio_cfg)
+        self.playback = create_playback(audio_cfg)
         self.vad = None
         if audio_cfg.get("vad_enabled", True):
             self.vad = EnergyVad(

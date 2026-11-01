@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from .factory import create_capture, create_playback
+from .vad import EnergyVad
 
-if TYPE_CHECKING:
-    from .capture import AudioCapture
-    from .playback import AudioPlayback
-    from .vad import EnergyVad
-
-__all__ = ["AudioCapture", "AudioPlayback", "EnergyVad"]
+__all__ = ["EnergyVad", "create_capture", "create_playback", "AudioCapture", "AudioPlayback"]
 
 
 def __getattr__(name: str):
@@ -21,8 +17,4 @@ def __getattr__(name: str):
         from .playback import AudioPlayback as _AudioPlayback
 
         return _AudioPlayback
-    if name == "EnergyVad":
-        from .vad import EnergyVad as _EnergyVad
-
-        return _EnergyVad
     raise AttributeError(name)

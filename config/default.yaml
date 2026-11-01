@@ -4,12 +4,16 @@ speaker:
   language: "ru"
 
 audio:
+  # alsa = arecord/aplay (recommended on Armbian without PulseAudio)
+  # sounddevice = PortAudio (needs Pulse/PipeWire usually)
+  backend: alsa
   sample_rate_capture: 16000
   sample_rate_playback: 22050
   channels: 1
-  # After `python -c "import sounddevice as sd; print(sd.query_devices())"`
-  # put device INDEX (int) or name substring. null = system default.
-  # On Rock Pi + FiFine AM8 mic is often a USB device index — set after first query.
+  # FiFine AM8 = card 2, onboard Analog out = card 0 (Crown)
+  alsa_input: "plughw:2,0"
+  alsa_output: "plughw:0,0"
+  # Used only when backend: sounddevice
   input_device: null
   output_device: null
 

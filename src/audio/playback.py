@@ -3,7 +3,6 @@ from __future__ import annotations
 import threading
 
 import numpy as np
-import sounddevice as sd
 
 
 class AudioPlayback:
@@ -18,6 +17,8 @@ class AudioPlayback:
         self._stop = threading.Event()
 
     def play(self, audio: np.ndarray, sample_rate: int | None = None) -> None:
+        import sounddevice as sd
+
         rate = sample_rate or self.sample_rate
         if audio.size == 0:
             return
@@ -58,5 +59,7 @@ class AudioPlayback:
         self.play(pcm, sample_rate=rate)
 
     def stop(self) -> None:
+        import sounddevice as sd
+
         self._stop.set()
         sd.stop()
